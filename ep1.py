@@ -83,6 +83,7 @@ while True:
             else: #Ести готового ответ есть
                 if btn_text == answer:
                     btn.click()
+                    trust_answer = True
                     break
             a = a+1
         # Исправление неверных ответов в файле
