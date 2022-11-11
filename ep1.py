@@ -107,7 +107,7 @@ while True:
         # Запись правильного ответа в файл
         with open('answer_ep1.json',"w",encoding='utf8') as file:
             json.dump(answer_data,file,ensure_ascii=False)
-    except KeyError:
+    except Exception:
         print("Ошибка при выборе ответа")
     # Следующая игра
     try:
@@ -121,9 +121,10 @@ while True:
                 next_btn.click()
                 break
             elif next_btn.text == "Играть ещё раз":
+                time.sleep(5)
                 next_btn.click()
                 break
-    except TimeoutException:
+    except Exception:
         if trust_answer == False:
             print("Удаление ошибки")
             answer_data.pop(img_url)
