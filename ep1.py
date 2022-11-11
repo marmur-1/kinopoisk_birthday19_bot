@@ -1,13 +1,17 @@
+import time
 import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 url = "https://www.kinopoisk.ru/special/birthday19/?utm_source=kinopoisk&utm_medium=selfpromo_kinopoisk&utm_term=app_banner&utm_campaign=kinopoisk19_game&utm_content=plus"
 with open("config.json", "r") as read_file:
     data = json.load(read_file)
+with open("answer_ep1.json", "r",encoding='utf8') as read_file:
+    answer_data = json.load(read_file)
 
 browser = webdriver.Chrome(ChromeDriverManager().install())
 browser.get(url)
@@ -29,6 +33,68 @@ element.send_keys(data['password'])
 element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'passp:sign-in')))
 element.click() 
 
+# ----------------------------------------СТАРТ ИГРЫ---------------------------------------------#
+# нажатие на кнопку ИГРАТЬ
+element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.episode-card__btn_current')))
+element.click() 
+# нажатие на кнопку НАЧАТЬ ИГРАТЬ
+element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.modal-start__button')))
+element.click() 
 
+# ------------------------------------------ИГРА------------------------------------------------#
 while True:
-    print()
+    # ссылка на изображение
+    time.sleep(3)
+    element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'img.game__test-image-img')))
+    img_url = element.get_attribute('src')
+    print(img_url)
+    # кнопки с ответами
+    answer_btns = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.game__test-answers-item')))
+    # ответ из файла
+    answer = None
+    try:
+        answer = answer_data[img_url]
+        print("Ответ "+answer)
+    except KeyError:
+        print("Нет ответа")
+    # выбр ответа
+    for btn in answer_btns:
+        btn_text = WebDriverWait(btn, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
+        if answer==None: #Ести готового ответа нет
+            btn.click()
+            time.sleep(0.5)
+            b = btn.get_attribute('class')
+            if b == "game__test-answers-item game__test-answers-item_state_error":
+                element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__title')))
+                text = element.text
+                text = text.split("«")[1]
+                text = text.split("»")[0]
+                answer_data[img_url] = text
+                print('Ошибка')
+            else:
+                print('Верно')
+                answer_data[img_url] = btn_text
+            break
+        else: #Ести готового ответ есть
+            if btn_text == answer:
+                btn.click()
+    # Запись правильного ответа в файл
+    with open('answer_ep1.json',"w",encoding='utf8') as file:
+        json.dump(answer_data,file,ensure_ascii=False)
+
+    # Следующая игра
+    try:
+        next_btns_div = WebDriverWait(browser, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__content')))
+        next_btns = answer_btns = WebDriverWait(next_btns_div, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.button')))
+        for next_btn in next_btns:
+            if next_btn.text == "Продолжить игру":
+                next_btn.click()
+                break
+            elif next_btn.text == "Играть ещё раз":
+                next_btn.click()
+                break
+    except TimeoutException:
+         a = 0
+    finally:
+        print("Следующий вопрос")
+
