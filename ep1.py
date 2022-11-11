@@ -43,30 +43,55 @@ element.click()
 
 # ------------------------------------------ИГРА------------------------------------------------#
 while True:
-    # ссылка на изображение
-    time.sleep(2)
-    element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'img.game__test-image-img')))
-    img_url = element.get_attribute('src')
-    # print(img_url)
-    # кнопки с ответами
-    answer_btns = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.game__test-answers-item')))
-    # ответ из файла
-    answer = None
-    try:
-        answer = answer_data[img_url]
-        print("Ответ "+answer)
-    except KeyError:
-        print("Нет ответа")
-    # выбр ответа
-    trust_answer = None
-    try:
-        a = 0
-        for btn in answer_btns:     
-            btn_text = WebDriverWait(btn, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
-            if answer==None: #Ести готового ответа нет
-                btn.click()
-                time.sleep(0.5)
-                b = btn.get_attribute('class')
+    while True:
+        # ссылка на изображение
+        time.sleep(2)
+        element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'img.game__test-image-img')))
+        img_url = element.get_attribute('src')
+        # print(img_url)
+        # кнопки с ответами
+        answer_btns = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.game__test-answers-item')))
+        # ответ из файла
+        answer = None
+        try:
+            answer = answer_data[img_url]
+            print("Ответ "+answer)
+        except KeyError:
+            print("Нет ответа")
+        # выбр ответа
+        trust_answer = None
+        try:
+            a = 0
+            for btn in answer_btns:     
+                btn_text = WebDriverWait(btn, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
+                if answer==None: #Ести готового ответа нет
+                    btn.click()
+                    time.sleep(0.5)
+                    b = btn.get_attribute('class')
+                    if b == "game__test-answers-item game__test-answers-item_state_error":
+                        element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__title')))
+                        text = element.text
+                        text = text.split("«")[1]
+                        text = text.split("»")[0]
+                        answer_data[img_url] = text
+                        print('Ошибка')
+                        trust_answer = False
+                    else:
+                        print('Верно')
+                        answer_data[img_url] = btn_text
+                        trust_answer = True
+                    break
+                else: #Ести готового ответ есть
+                    if btn_text == answer:
+                        btn.click()
+                        trust_answer = True
+                        break
+                a = a+1
+            # Исправление неверных ответов в файле
+            if a >=4:
+                btn_text = WebDriverWait(answer_btns[0], 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
+                answer_btns[0].click()
+                b = answer_btns[0].get_attribute('class')
                 if b == "game__test-answers-item game__test-answers-item_state_error":
                     element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__title')))
                     text = element.text
@@ -80,54 +105,30 @@ while True:
                     answer_data[img_url] = btn_text
                     trust_answer = True
                 break
-            else: #Ести готового ответ есть
-                if btn_text == answer:
-                    btn.click()
-                    trust_answer = True
+            # Запись правильного ответа в файл
+            with open('answer_ep1.json',"w",encoding='utf8') as file:
+                json.dump(answer_data,file,ensure_ascii=False)
+        except Exception:
+            print("Ошибка при выборе ответа")
+        # Следующая игра
+        try:
+            next_btns_div = WebDriverWait(browser, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__content')))
+            next_btns = answer_btns = WebDriverWait(next_btns_div, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.button')))
+            if trust_answer == True:
+                print("Удаление ошибки")
+                answer_data.pop(img_url)
+            for next_btn in next_btns:
+                if next_btn.text == "Продолжить игру":
+                    next_btn.click()
                     break
-            a = a+1
-        # Исправление неверных ответов в файле
-        if a >=4:
-            btn_text = WebDriverWait(answer_btns[0], 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
-            answer_btns[0].click()
-            b = answer_btns[0].get_attribute('class')
-            if b == "game__test-answers-item game__test-answers-item_state_error":
-                element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__title')))
-                text = element.text
-                text = text.split("«")[1]
-                text = text.split("»")[0]
-                answer_data[img_url] = text
-                print('Ошибка')
-                trust_answer = False
-            else:
-                print('Верно')
-                answer_data[img_url] = btn_text
-                trust_answer = True
-            break
-        # Запись правильного ответа в файл
-        with open('answer_ep1.json',"w",encoding='utf8') as file:
-            json.dump(answer_data,file,ensure_ascii=False)
-    except Exception:
-        print("Ошибка при выборе ответа")
-    # Следующая игра
-    try:
-        next_btns_div = WebDriverWait(browser, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__content')))
-        next_btns = answer_btns = WebDriverWait(next_btns_div, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.button')))
-        if trust_answer == True:
-            print("Удаление ошибки")
-            answer_data.pop(img_url)
-        for next_btn in next_btns:
-            if next_btn.text == "Продолжить игру":
-                next_btn.click()
-                break
-            elif next_btn.text == "Играть ещё раз":
-                time.sleep(5)
-                next_btn.click()
-                break
-    except Exception:
-        if trust_answer == False:
-            print("Удаление ошибки")
-            answer_data.pop(img_url)
-    finally:
-        print("Следующий вопрос")
+                elif next_btn.text == "Играть ещё раз":
+                    time.sleep(5)
+                    next_btn.click()
+                    break
+        except Exception:
+            if trust_answer == False:
+                print("Удаление ошибки")
+                answer_data.pop(img_url)
+        finally:
+            print("Следующий вопрос")
 
