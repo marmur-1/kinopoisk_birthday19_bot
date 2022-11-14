@@ -45,7 +45,7 @@ element.click()
 while True:
     while True:
         # цитата
-        time.sleep(randrange(5, 35))
+        time.sleep(randrange(5, 20))
         element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.game__test-question')))
         question = element.text
         # print(img_url)
