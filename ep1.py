@@ -35,7 +35,7 @@ element.click()
 
 # ----------------------------------------СТАРТ ИГРЫ---------------------------------------------#
 # нажатие на кнопку ИГРАТЬ
-element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.episode-card__btn_current')))
+element = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.episode-card__btn')))[0]
 element.click() 
 # нажатие на кнопку НАЧАТЬ ИГРАТЬ
 element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.modal-start__button')))
