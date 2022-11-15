@@ -18,7 +18,7 @@ browser.get(url)
 
 # --------------------------------------РЕГИСТРАЦИЯ-------------------------------------------#
 # Вход в аккаунт
-element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.header__btn')))
+element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button.header__button')))
 element.click() 
 # Ввод логина
 element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'passp-field-login')))
