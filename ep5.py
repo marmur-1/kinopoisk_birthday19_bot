@@ -36,9 +36,11 @@ element.click()
 
 # ----------------------------------------СТАРТ ИГРЫ---------------------------------------------#
 # нажатие на кнопку ИГРАТЬ
+time.sleep(5)
 element = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.episode-card__btn')))[4]
 element.click() 
 # Выбор вселенной
+time.sleep(5)
 univers = randint(0, 9)
 print("Вселенная номер: "+str(univers))
 element = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.modal-multigame__game-card')))
