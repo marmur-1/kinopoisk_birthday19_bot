@@ -15,8 +15,6 @@ with open("answer_ep5.json", "r",encoding='utf8') as read_file:
     answer_data = json.load(read_file)
 
 browser = webdriver.Chrome(ChromeDriverManager().install())
-browser.get("chrome://settings/") 
-browser.execute_script("chrome.settingsPrivate.setDefaultZoom(0.5);")
 browser.get(url)
 
 # --------------------------------------РЕГИСТРАЦИЯ-------------------------------------------#
@@ -40,7 +38,6 @@ element.click()
 # нажатие на кнопку ИГРАТЬ
 time.sleep(5)
 element = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'button.episode-card__btn')))[4]
-time.sleep(2)
 element.click() 
 # Выбор вселенной
 time.sleep(5)
@@ -74,7 +71,7 @@ while True:
                 btn_text = WebDriverWait(btn, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.text-fit'))).text
                 if answer==None: #Ести готового ответа нет
                     btn.click()
-                    time.sleep(1.5)
+                    time.sleep(0.5)
                     b = btn.get_attribute('class')
                     if b == "game__test-answers-item game__test-answers-item_state_error":
                         element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.modal-wrong-answer__title')))
@@ -133,14 +130,6 @@ while True:
                 elif next_btn.text == "Играть ещё раз":
                     time.sleep(5)
                     next_btn.click()
-                    break
-                elif next_btn.text == "Выбрать вселенную":
-                    time.sleep(5)
-                    next_btn.click()
-                    # Выбор вселенной
-                    time.sleep(5)
-                    element = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.modal-multigame__game-card')))
-                    element[univers].click() 
                     break
         except Exception:
             if trust_answer == False:
