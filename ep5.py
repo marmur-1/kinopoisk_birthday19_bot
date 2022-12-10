@@ -148,3 +148,4 @@ while True:
                 answer_data[str(univers)].pop(question)
         finally:
             print("Следующий вопрос")
+            
